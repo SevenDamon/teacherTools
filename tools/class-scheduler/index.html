@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>班级排课工作台</title>
+<style>
+  :root{
+    --bg:#f7f4ee; --card:#ffffff; --primary:#7cc6a8; --primary-d:#5fa98c;
+    --accent:#f3b6c2; --accent-d:#e29bab; --text:#3a3a3a; --muted:#9a958c;
+    --line:#ece7df; --warn:#e8a23d; --danger:#e07a7a; --shadow:0 2px 10px rgba(120,110,90,.10);
+    --left-width:280px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);font-size:14px;}
+  header{display:flex;align-items:center;gap:10px;padding:12px 18px;background:var(--card);box-shadow:var(--shadow);position:sticky;top:0;z-index:20;}
+  header h1{font-size:18px;margin:0;color:var(--primary-d);font-weight:700;}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:20px;overflow:hidden;}
+  .seg button{border:none;background:transparent;padding:7px 16px;cursor:pointer;color:var(--muted);font-size:13px;}
+  .seg button.on{background:var(--primary);color:#fff;}
+  .spacer{flex:1;}
+  .btn{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:7px 13px;cursor:pointer;font-size:13px;color:var(--text);}
+  .btn:hover{border-color:var(--primary);}
+  .btn.primary{background:var(--primary);color:#fff;border-color:var(--primary);}
+  .btn.primary:hover{background:var(--primary-d);}
+  .btn.accent{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .layout{display:flex;height:calc(100vh - 56px);}
+  .left{width:var(--left-width);min-width:180px;max-width:calc(100vw - 760px);background:var(--card);padding:12px;display:flex;flex-direction:column;}
+  #leftList{flex:1;overflow:auto;margin-top:8px;display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px;align-content:start;}
+  .filters{display:flex;flex-direction:column;gap:8px;}
+  .grade-tabs{display:flex;flex-wrap:wrap;gap:5px;}
+  .grade-tabs button{min-width:38px;flex:1;padding:6px 0;border:1px solid var(--line);background:#fff;border-radius:6px;font-size:12px;cursor:pointer;color:var(--text);}
+  .grade-tabs button.on{background:var(--primary);color:#fff;border-color:var(--primary);}
+  .filters input{width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:6px;font-size:12px;}
+  .left-hd{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted);margin:4px 0 6px;grid-column:1 / -1;}
+  .left-hd b{color:var(--text);}
+  .item{display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;padding:10px 8px;border:1px solid var(--line);border-radius:10px;cursor:grab;background:#fff;transition:.15s;min-width:0;}
+  .item:hover{border-color:var(--primary);}
+  .item:active{cursor:grabbing;}
+  .item.sel{border-color:var(--primary);background:#eef8f3;box-shadow:0 0 0 2px rgba(124,198,168,.18) inset;}
+  .item .nm{font-weight:600;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:4px;line-height:1.3;}
+  .item .sb{font-size:12px;color:var(--muted);}
+  .item .row2{display:flex;flex-direction:column;align-items:center;gap:2px;margin-top:2px;}
+  .tip{position:fixed;z-index:80;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:12px 14px;max-width:260px;font-size:12px;display:none;pointer-events:none;line-height:1.6;}
+  .tip h4{margin:0 0 6px;font-size:13px;color:var(--primary-d);}
+  .tip .r{display:flex;justify-content:space-between;gap:12px;color:var(--text);}
+  .tip .r .m{color:var(--muted);white-space:nowrap;}
+  .tip .sec{margin-top:6px;padding-top:6px;border-top:1px dashed var(--line);}
+  .tmenu{position:fixed;z-index:90;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.18);width:300px;max-height:82vh;overflow:auto;padding:14px;display:none;}
+  .tmenu h3{margin:0 0 10px;font-size:15px;color:var(--primary-d);display:flex;justify-content:space-between;align-items:center;}
+  .tmenu .close{cursor:pointer;color:var(--muted);font-size:20px;line-height:1;padding:0 4px;}
+  .tmenu .sec{border-top:1px dashed var(--line);margin-top:10px;padding-top:10px;}
+  .tmenu .sec-t{font-size:12px;color:var(--muted);margin-bottom:6px;display:flex;justify-content:space-between;}
+  .tmenu .subj-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+  .tmenu .subj-row .nm{flex:1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .tmenu .subj-row input{width:52px;padding:4px 6px;border:1px solid var(--line);border-radius:6px;font-size:12px;}
+  .tmenu select{padding:5px 7px;border:1px solid var(--line);border-radius:6px;font-size:12px;background:#fff;max-width:150px;}
+  .tmenu .add-row{display:flex;gap:6px;margin-top:6px;}
+  .tmenu .hint-sm{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5;}
+  .tmenu .danger{color:var(--danger);}
+  .tag{font-size:11px;padding:1px 6px;border-radius:6px;background:var(--accent);color:#fff;white-space:nowrap;}
+  .tag.head{background:var(--primary);}
+  .right{flex:1;min-width:760px;overflow:auto;padding:14px;}
+  .resizer{width:6px;background:var(--line);cursor:col-resize;flex:none;touch-action:none;transition:background .15s;}
+  .resizer:hover,.resizer.resizing{background:var(--primary);}
+  .bar{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+  .pool{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;padding:8px;background:#fff;border:1px dashed var(--line);border-radius:8px;}
+  .pool .lab{font-size:12px;color:var(--muted);align-self:center;margin-right:4px;}
+  .subj-card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;box-shadow:var(--shadow);cursor:default;}
+  .subj-card .sc-hd{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;}
+  .subj-card .sc-dist{display:flex;flex-wrap:wrap;gap:6px;}
+  .chip-sub{padding:3px 9px;border-radius:12px;background:#f0faf6;border:1px solid #d8eee4;color:var(--primary-d);font-size:12px;white-space:nowrap;}
+  .chip{padding:4px 9px;border-radius:14px;background:var(--primary);color:#fff;font-size:12px;cursor:grab;user-select:none;}
+  .chip:active{cursor:grabbing;}
+  #printTitle{display:none;}
+  table.grid{border-collapse:collapse;width:100%;background:#fff;box-shadow:var(--shadow);border-radius:8px;overflow:hidden;}
+  table.grid th,table.grid td{border:1px solid var(--line);padding:0;height:46px;text-align:center;vertical-align:middle;width:16.6%;}
+  table.grid th{background:#f3efe8;color:var(--muted);font-weight:600;font-size:13px;height:34px;}
+  table.grid tr.seg-head th{background:#eef0f5;color:var(--text);font-size:11px;height:22px;padding:2px 6px;font-weight:600;letter-spacing:2px;text-align:center;border-bottom:1px dashed var(--line);}
+  table.grid td .cell{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;line-height:1.25;padding:2px 4px;position:relative;cursor:pointer;}
+  table.grid td .cell:hover{background:#f0faf6;}
+  .cell .subj{font-weight:600;}
+  .cell .tname{font-size:11px;color:var(--muted);}
+  .cell.fixed{background:#fff6e6;}
+  .cell.fixed .subj{color:#c98a2b;}
+  .cell.locked{box-shadow:0 0 0 2px var(--accent-d) inset;}
+  .cell.main{background:#eaf6f0;}
+  .cell.main .subj{color:var(--primary-d);}
+  .cell .lk{position:absolute;top:2px;right:3px;font-size:10px;color:var(--accent-d);}
+  .cell .fx{position:absolute;top:2px;left:3px;font-size:10px;color:#c98a2b;}
+  .stats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 12px;font-size:13px;box-shadow:var(--shadow);cursor:pointer;transition:.15s;user-select:none;}
+  .stat:hover{border-color:var(--primary);transform:translateY(-1px);}
+  .stat:active{transform:translateY(0);}
+  .stat.zero{opacity:.55;}
+  .stat.zero:hover{opacity:.9;}
+  .stat.zero b{color:var(--muted)!important;}
+  .stat b{color:var(--primary-d);}
+  .stat.bad b{color:var(--danger);}
+  .modal{position:fixed;inset:0;background:rgba(60,55,45,.35);display:none;align-items:center;justify-content:center;z-index:50;}
+  .modal.show{display:flex;}
+  .sheet{background:#fff;border-radius:12px;padding:0;width:460px;max-width:92vw;max-height:86vh;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.2);display:flex;flex-direction:column;}
+  .sheet.wide{width:820px;max-width:96vw;}
+  .sheet h2{padding:18px 22px 6px;margin:0;}
+  .sheet>div[id$="Body"]{padding:0 22px;}
+  .sheet .acts{padding:12px 22px 16px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:10px;background:#fff;}
+  .set-layout{display:flex;flex:1;min-height:0;}
+  .set-nav{flex:0 0 148px;border-right:1px solid var(--line);padding:14px 10px;display:flex;flex-direction:column;gap:4px;background:#faf8f3;overflow:auto;}
+  .set-nav button{width:100%;text-align:left;padding:10px 12px;border:1px solid transparent;background:transparent;border-radius:7px;font-size:13px;color:var(--text);cursor:pointer;font-family:inherit;line-height:1.3;}
+  .set-nav button:hover{background:#fff;}
+  .set-nav button.on{background:#fff;border-color:var(--primary);color:var(--primary-d);font-weight:600;}
+  .set-content{flex:1;padding:18px 22px;overflow:auto;}
+  .set-content h3{margin:0 0 12px;font-size:15px;color:var(--primary-d);}
+  .sheet h2{margin:0 0 14px;font-size:16px;color:var(--primary-d);}
+  .sheet label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px;}
+  .sheet input,.sheet select,.sheet textarea{width:100%;padding:8px;border:1px solid var(--line);border-radius:7px;font-size:13px;font-family:inherit;}
+  .sheet textarea{height:140px;resize:vertical;}
+  .row{display:flex;gap:10px;}
+  .row>*{flex:1;}
+  .sheet .acts{display:flex;justify-content:flex-end;gap:10px;margin-top:4px;}
+  .hint{font-size:12px;color:var(--muted);background:#faf8f3;border-radius:7px;padding:8px 10px;margin-top:8px;line-height:1.5;}
+  .card{background:#faf8f3;border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:14px;}
+  .card h3{margin:0 0 10px;font-size:13px;color:var(--primary-d);display:flex;align-items:center;gap:6px;}
+  .card h3::before{content:"";width:4px;height:14px;background:var(--primary);border-radius:2px;display:inline-block;}
+  .field{margin-bottom:10px;}
+  .field-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;min-width:0;}
+  .field-row label{flex:0 0 130px;font-size:13px;color:var(--muted);margin:0;line-height:1.3;}
+  .field-row input{flex:1;min-width:0;}
+  .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px;}
+  .field input,.field textarea{width:100%;padding:8px;border:1px solid var(--line);border-radius:7px;font-size:13px;font-family:inherit;}
+  .field textarea{height:120px;resize:vertical;}
+  .opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;}
+  .set-table{width:100%;border-collapse:collapse;font-size:13px;}
+  .set-table th,.set-table td{border:1px solid var(--line);padding:6px 8px;text-align:center;background:#fff;}
+  .set-table th{background:#faf8f3;font-weight:600;color:var(--muted);font-size:12px;}
+  .set-table input[type=number]{width:60px;padding:4px 6px;border:1px solid var(--line);border-radius:5px;font-size:13px;text-align:center;font-family:inherit;}
+  .set-table input[type=text]{padding:5px 7px;border:1px solid var(--line);border-radius:5px;font-size:12px;font-family:inherit;}
+  .set-table .nm-input{width:110px;text-align:left;}
+  .set-table input[type=number]:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 2px rgba(124,198,168,.18);}
+  .btn-step{background:#faf8f3;border:1px solid var(--line);border-radius:5px;width:24px;height:24px;cursor:pointer;color:var(--text);font-size:13px;line-height:1;padding:0;}
+  .btn-step:hover{background:var(--primary);color:#fff;border-color:var(--primary);}
+  .setting-block{margin-bottom:14px;}
+  .setting-label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;}
+  .course-table-wrap{overflow:auto;max-width:100%;}
+  .course-table input[type=number]{width:48px;}
+  .course-table th:first-child,.course-table td:first-child{text-align:left;min-width:96px;font-weight:600;}
+  .rm-btn{background:transparent;border:1px solid var(--line);border-radius:5px;color:var(--danger);cursor:pointer;font-size:11px;padding:3px 9px;white-space:nowrap;}
+  .rm-btn:hover{background:#fdeaea;border-color:var(--danger);}
+  .rm-btn.arm{background:var(--danger);color:#fff;border-color:var(--danger);font-weight:600;}
+  .rm-btn.arm:hover{background:var(--danger);color:#fff;}
+  .course-add{display:flex;gap:6px;margin-bottom:10px;align-items:center;flex-wrap:wrap;}
+  .course-add input{flex:1;min-width:140px;padding:6px 8px;border:1px solid var(--line);border-radius:6px;font-size:13px;font-family:inherit;}
+  .warn-banner{margin:0 0 12px;padding:10px 12px;background:#fff6e6;border:1px solid #f0d99c;border-radius:8px;color:#a16a17;font-size:12px;line-height:1.6;}
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#3a3a3a;color:#fff;padding:12px 22px;border-radius:10px;font-size:13px;line-height:1.6;z-index:300;max-width:88vw;box-shadow:0 6px 24px rgba(0,0,0,.28);display:none;white-space:pre-line;text-align:center;pointer-events:none;}
+  .toast.ok{background:var(--primary-d);}
+  .toast.warn{background:#c98a2b;}
+  .toast.err{background:var(--danger);}
+  .opt{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--text);background:#fff;border:1px solid var(--line);border-radius:8px;padding:9px 11px;cursor:default;margin:0;}
+  .sheet label.opt{margin:0;}
+  .opt input{width:auto;margin:0;accent-color:var(--primary);flex:none;}
+  .ctx{position:fixed;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:6px;z-index:60;display:none;min-width:150px;}
+  .ctx div{padding:7px 12px;cursor:pointer;border-radius:6px;font-size:13px;}
+  .ctx div:hover{background:#eef8f3;}
+  .ctx .danger:hover{background:#fdeaea;color:var(--danger);}
+  .empty{color:var(--muted);text-align:center;padding:60px 20px;font-size:14px;}
+  .lock-sec{margin-top:14px;}
+  .lock-sec h3{font-size:13px;color:var(--muted);margin:6px 0 8px;}
+  .lock-empty{font-size:13px;color:var(--muted);padding:4px 2px 10px;}
+  .lock-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;margin-bottom:7px;background:#fff;font-size:13px;}
+  .about-trigger{padding-left:10px;padding-right:10px;color:var(--primary-d);font-weight:600;white-space:nowrap;}
+  .author-sheet{width:620px;}
+  .author-body{padding:0 22px 20px;overflow:auto;text-align:center;}
+  .author-kicker{font-size:12px;color:var(--muted);margin:0 0 5px;}
+  .author-name{font-size:24px;font-weight:750;color:var(--primary-d);letter-spacing:.5px;margin:0 0 16px;}
+  .author-qr-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;}
+  .author-qr-card{margin:0;padding:14px;background:#faf8f3;border:1px solid var(--line);border-radius:12px;display:flex;flex-direction:column;align-items:center;gap:9px;}
+  .author-qr-card img{display:block;width:100%;max-width:220px;aspect-ratio:1/1;object-fit:contain;background:#fff;border-radius:9px;}
+  .author-qr-card figcaption{font-size:13px;font-weight:600;color:var(--text);}
+  .author-qr-card small{font-size:11px;color:var(--muted);margin-top:-5px;}
+  @media(max-width:680px){.author-qr-grid{grid-template-columns:1fr}.author-sheet{width:94vw}.author-qr-card img{max-width:190px}}
+  @media print{
+    header, .left, .pool, .bar, .stats, .ctx, .modal{display:none !important;}
+    body{background:#fff;}
+    #printTitle{display:block;text-align:center;font-size:20px;font-weight:700;margin:0 0 12px;}
+    .layout{display:block;height:auto;}
+    .right{padding:0;}
+    table.grid{box-shadow:none;}
+  }
+</style>
+</head>
+<body>
+<script src="./xlsx.full.min.js"></script>
+
+<header>
+  <h1>班级排课工作台 <span style="font-size:11px;color:var(--muted);font-weight:400;">v2.8·主科可配置</span></h1>
+  <div class="seg" id="viewSeg">
+    <button data-v="teacher" class="on">教师课表</button>
+    <button data-v="class">班级课表</button>
+  </div>
+  <div class="spacer"></div>
+  <button class="btn" id="btnInit">初始化排课</button>
+  <button class="btn primary" id="btnHead">排班主任</button>
+  <button class="btn primary" id="btnAll">一键全排</button>
+  <button class="btn" id="btnFixed">固定课</button>
+  <button class="btn" id="btnSettings">设置</button>
+  <button class="btn" id="btnImport">导入</button>
+  <button class="btn" id="btnExport">导出</button>
+  <button class="btn" id="btnPrint">打印</button>
+  <button class="btn about-trigger" id="btnAbout" type="button" onclick="openModal('mAbout')" title="关于作者">作者</button>
+</header>
+
+<div id="printTitle"></div>
+<div class="layout">
+  <aside class="left" id="left">
+    <div class="filters" id="leftFilters"></div>
+    <div id="leftList"></div>
+  </aside>
+  <div class="resizer" id="resizer"></div>
+  <main class="right" id="right"></main>
+</div>
+
+<div class="tip" id="teacherTip"></div>
+
+<div class="modal" id="mAbout"><div class="sheet author-sheet">
+  <h2>关于作者</h2>
+  <div class="author-body">
+    <p class="author-kicker">全网统一昵称</p>
+    <div class="author-name">科学老师学AI</div>
+    <div class="author-qr-grid">
+      <figure class="author-qr-card">
+        <img src="./assets/author-official-account.jpg" alt="科学老师学AI公众号二维码">
+        <figcaption>微信公众号</figcaption>
+        <small>扫码关注</small>
+      </figure>
+      <figure class="author-qr-card">
+        <img src="./assets/author-wechat.png" alt="科学老师学AI微信二维码">
+        <figcaption>微信二维码</figcaption>
+        <small>扫码添加</small>
+      </figure>
+    </div>
+  </div>
+  <div class="acts"><button class="btn primary" type="button" onclick="closeModal('mAbout')">关闭</button></div>
+</div></div>
+
+<div class="modal" id="mTeachers"><div class="sheet">
+  <h2>教师名单</h2>
+  <p class="hint">每行一位：<b>姓名,科目,年级(跨年级用-分隔如1-2-3),周课时,是否班主任(Y/N),带班(班级标签如 一(1)，仅班主任填)</b><br>例：张老师,语文,1,Y,一(1) ｜ 李老师,数学,1,4,N</p>
+  <div class="card" style="margin-top:10px;padding:12px;">
+    <h3 style="margin:0 0 8px;">下载空模板（.xlsx）</h3>
+    <p style="margin:0 0 8px;font-size:12px;color:var(--muted);">模板只含表头，请按列填写后另存为 .xlsx，再点下方「上传 .xlsx」一键识别。</p>
+    <div class="row">
+      <button class="btn primary" onclick="downloadTemplate(1)">一年级模板</button>
+      <button class="btn primary" onclick="downloadTemplate('all')">全年级模板</button>
+    </div>
+  </div>
+  <label>粘贴名单（覆盖当前）</label>
+  <textarea id="taTeachers"></textarea>
+  <label class="opt" style="margin:10px 0 4px;display:flex;align-items:center;gap:8px;font-size:13px;">
+    <input type="checkbox" id="impCourse"> 从模板同步课程（勾选后，导入时读取模板「各年级课程」页的课时；不勾选则只导入老师）
+  </label>
+  <div class="acts">
+    <button class="btn" onclick="closeModal('mTeachers')">取消</button>
+    <button class="btn primary" onclick="applyTeachers()">导入</button>
+    <label class="btn filebtn">上传 .xlsx<input type="file" id="fileTeachers" accept=".xlsx,.xls" style="display:none" onchange="applyTeachersXlsx(this)"></label>
+  </div>
+</div></div>
+
+<div class="modal" id="mIssues"><div class="sheet" style="width:640px;max-width:95vw;">
+  <h2 id="issuesTitle">清单</h2>
+  <div id="issuesBody" style="max-height:62vh;overflow:auto;"></div>
+  <div class="acts"><button class="btn" onclick="closeModal('mIssues')">关闭</button></div>
+</div></div>
+
+<div class="modal" id="mSettings"><div class="sheet wide">
+  <h2>基础设置</h2>
+  <div style="padding:0 22px;"><div class="warn-banner">⚠️ 保存后会立即按新配置重建并重排，<b>已有的排课结果会被清空</b>（包括手动拖拽、锁定和排班主任结果）。</div></div>
+  <div class="set-layout">
+    <nav class="set-nav" id="setNav">
+      <button type="button" data-tab="basic" class="on">基础</button>
+      <button type="button" data-tab="grades">年级班级</button>
+      <button type="button" data-tab="rooms">教室</button>
+      <button type="button" data-tab="courses">课程</button>
+      <button type="button" data-tab="rules">规则</button>
+      <button type="button" data-tab="teachers">教师</button>
+    </nav>
+    <div class="set-content" id="setContent"></div>
+  </div>
+  <div class="acts">
+    <button class="btn" onclick="closeModal('mSettings')">取消</button>
+    <button class="btn primary" onclick="applySettings()">保存</button>
+  </div>
+</div></div>
+
+<div class="modal" id="mFixed"><div class="sheet">
+  <h2>固定课设置</h2>
+  <p class="hint">批量固定：指定"星期+节次+科目"，应用到含该科目的班级。单格固定请在班级课表点格子→设为固定。</p>
+  <div class="row">
+    <div><label>星期(1-5)</label><input id="fxDay" type="number" value="2" min="1" max="5"></div>
+    <div><label>节次(1-6)</label><input id="fxPer" type="number" value="3" min="1" max="6"></div>
+  </div>
+  <div class="row">
+    <div><label>科目</label><input id="fxSubj" placeholder="如 音乐"></div>
+    <div><label>范围</label><select id="fxScope"><option value="all">全校</option></select></div>
+  </div>
+  <div class="acts">
+    <button class="btn" onclick="closeModal('mFixed')">关闭</button>
+    <button class="btn primary" onclick="applyBatchFixed()">添加固定</button>
+  </div>
+</div></div>
+
+<div class="modal" id="mHead"><div class="sheet">
+  <h2>排班主任</h2>
+  <p class="hint" id="headHint"></p>
+  <div class="acts">
+    <button class="btn" onclick="closeModal('mHead')">关闭</button>
+  </div>
+</div></div>
+
+<div class="modal" id="mLocks"><div class="sheet">
+  <h2>锁定管理</h2>
+  <p class="hint">这里列出所有已锁定的对象。点「解锁」即可解除。<b>教师整组锁定</b>需在该教师处解锁（会同时解除其全部已排课时）；<b>单格锁定</b>只解这一格。</p>
+  <div id="lockList" style="max-height:56vh;overflow:auto;"></div>
+  <div class="acts">
+    <button class="btn primary" onclick="closeModal('mLocks')">关闭</button>
+  </div>
+</div></div>
+
+<div class="ctx" id="ctx">
+  <div data-a="fix">设为固定课…</div>
+  <div data-a="lock">锁定此格</div>
+  <div data-a="unlock">解锁此格</div>
+  <div data-a="clear" class="danger">清除此格</div>
+</div>
+
+<script src="./scheduler-core.js"></script>
+
+<script src="./scheduler-app.js"></script>
+</body>
+</html>

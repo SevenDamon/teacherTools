@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="科学老师学AI制作的轻量化、可离线教师工具。">
+  <title>教师工具箱｜科学老师学AI</title>
+  <style>
+    :root{--paper:#f4f0e6;--ink:#1d2a25;--muted:#66726b;--green:#245a46;--lime:#c9dc71;--orange:#ef7d4c;--line:#c9c5b8;--white:#fffdf7;}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font-family:"Microsoft YaHei","PingFang SC",sans-serif;line-height:1.65}
+    body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.38;background-image:radial-gradient(rgba(29,42,37,.16) .65px,transparent .65px);background-size:7px 7px;mix-blend-mode:multiply}
+    a{color:inherit}.shell{width:min(1120px,calc(100% - 36px));margin:auto;position:relative}
+    header{height:76px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}
+    .brand{display:flex;align-items:center;gap:11px;font-weight:900;letter-spacing:.04em;text-decoration:none}.brand-mark{width:34px;height:34px;border:2px solid var(--ink);border-radius:50% 50% 46% 54%;display:grid;place-items:center;background:var(--lime);transform:rotate(-5deg);font-family:Georgia,serif;font-size:18px}.brand small{display:block;color:var(--muted);font-size:10px;font-weight:600;letter-spacing:.08em}
+    nav{display:flex;gap:20px;font-size:13px;font-weight:700}nav a{text-decoration:none;border-bottom:1px solid transparent}nav a:hover{border-color:var(--ink)}
+    .hero{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(300px,.8fr);gap:58px;align-items:center;padding:86px 0 72px}
+    .eyebrow{display:inline-flex;align-items:center;gap:9px;font-size:12px;font-weight:900;letter-spacing:.18em;text-transform:uppercase}.eyebrow:before{content:"";width:32px;height:3px;background:var(--orange)}
+    h1{font-family:"STKaiti","KaiTi",serif;font-size:clamp(54px,8vw,96px);line-height:.98;letter-spacing:-.04em;margin:24px 0 26px;font-weight:900}.hero h1 em{font-style:normal;color:var(--green);position:relative}.hero h1 em:after{content:"";position:absolute;height:12px;left:2%;right:-3%;bottom:4px;background:var(--lime);z-index:-1;transform:rotate(-1.5deg)}
+    .lead{max-width:620px;font-size:18px;color:var(--muted);margin:0}.hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:34px}.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:46px;padding:0 20px;border:2px solid var(--ink);font-weight:900;font-size:14px;text-decoration:none;box-shadow:4px 4px 0 var(--ink);transition:.15s}.btn.primary{background:var(--green);color:#fff}.btn.secondary{background:var(--white)}.btn:hover{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--ink)}
+    .hero-note{background:var(--white);border:1px solid var(--line);padding:28px 28px 24px;transform:rotate(2deg);box-shadow:12px 14px 0 rgba(36,90,70,.11);position:relative}.hero-note:before{content:"课堂工具原则";position:absolute;top:-14px;left:24px;background:var(--orange);color:#fff;padding:3px 11px;font-size:11px;font-weight:900;letter-spacing:.1em;transform:rotate(-3deg)}.hero-note ol{margin:8px 0 0;padding:0;list-style:none;counter-reset:notes}.hero-note li{counter-increment:notes;display:grid;grid-template-columns:35px 1fr;gap:12px;padding:15px 0;border-bottom:1px dashed var(--line)}.hero-note li:last-child{border:0}.hero-note li:before{content:"0" counter(notes);font-family:Georgia,serif;font-style:italic;color:var(--green);font-weight:700}
+    .section{padding:72px 0;border-top:1px solid var(--line)}.section-head{display:flex;align-items:end;justify-content:space-between;gap:24px;margin-bottom:30px}.section h2{font-family:"STKaiti","KaiTi",serif;font-size:42px;line-height:1.1;margin:0}.section-head p{margin:0;color:var(--muted);font-size:13px}
+    .tool-card{display:grid;grid-template-columns:1.05fr .95fr;background:var(--white);border:2px solid var(--ink);box-shadow:8px 8px 0 var(--ink);overflow:hidden}.tool-copy{padding:38px}.tool-index{font-family:Georgia,serif;color:var(--orange);font-weight:700;font-style:italic}.tool-copy h3{font-size:31px;margin:7px 0 10px}.tool-copy p{color:var(--muted);margin:0 0 22px}.tags{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:27px}.tag{border:1px solid var(--line);border-radius:99px;padding:4px 10px;font-size:11px;font-weight:800;background:var(--paper)}
+    .tool-visual{min-height:330px;background:var(--green);color:#fff;position:relative;display:grid;place-items:center;padding:30px;overflow:hidden}.tool-visual:before,.tool-visual:after{content:"";position:absolute;border-radius:50%;border:1px solid rgba(255,255,255,.25)}.tool-visual:before{width:360px;height:360px;right:-120px;top:-160px}.tool-visual:after{width:240px;height:240px;left:-90px;bottom:-130px}.desk{width:min(360px,90%);background:#fffdf7;color:var(--ink);border:2px solid var(--ink);padding:17px;transform:rotate(-3deg);box-shadow:10px 12px 0 rgba(0,0,0,.25);z-index:1}.desk-top{display:flex;justify-content:space-between;border-bottom:2px solid var(--ink);padding-bottom:9px;font-weight:900}.desk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:13px}.desk-cell{height:48px;background:var(--paper);border:1px solid var(--line);display:grid;place-items:center;font-size:11px;font-weight:800}.desk-cell:nth-child(2),.desk-cell:nth-child(6){background:var(--lime)}
+    .promise-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.promise{padding:24px 22px;border-top:4px solid var(--green);background:rgba(255,253,247,.55)}.promise b{display:block;font-family:"STKaiti","KaiTi",serif;font-size:23px;margin-bottom:6px}.promise p{font-size:13px;color:var(--muted);margin:0}
+    footer{display:flex;justify-content:space-between;gap:20px;padding:30px 0 44px;border-top:1px solid var(--line);color:var(--muted);font-size:12px}.author{color:var(--ink);font-weight:900}
+    @media(max-width:760px){nav{display:none}.hero{grid-template-columns:1fr;gap:48px;padding:58px 0}.hero-note{transform:none}.tool-card{grid-template-columns:1fr}.tool-copy{padding:28px}.tool-visual{min-height:270px}.promise-grid{grid-template-columns:1fr}.section-head,footer{align-items:flex-start;flex-direction:column}.section{padding:54px 0}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.btn{transition:none}}
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <a class="brand" href="./"><span class="brand-mark">T</span><span>教师工具箱<small>TEACHER TOOLS</small></span></a>
+      <nav aria-label="主要导航"><a href="#tools">工具</a><a href="#principles">原则</a><a href="https://aieduflow.cn/" target="_blank" rel="noopener noreferrer">个人网站</a><a href="https://github.com/SevenDamon/teacherTools">GitHub</a></nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div>
+          <span class="eyebrow">为真实课堂而做</span>
+          <h1>轻一点，<br><em>好用一点。</em></h1>
+          <p class="lead">不用安装，不用登录。把一个 HTML 文件带进教室，双击就能开始工作。</p>
+          <div class="hero-actions"><a class="btn primary" href="#tools">查看工具 ↓</a><a class="btn secondary" href="https://github.com/SevenDamon/teacherTools">查看源码 ↗</a></div>
+        </div>
+        <aside class="hero-note" aria-label="工具设计原则">
+          <ol><li>教室断网，也能继续使用</li><li>数据留在老师自己的电脑</li><li>一个文件，方便备份和迁移</li></ol>
+        </aside>
+      </section>
+
+      <section class="section" id="tools">
+        <div class="section-head"><h2>现在可以使用</h2><p>持续更新，不追求工具数量，只解决真实问题。</p></div>
+        <article class="tool-card">
+          <div class="tool-copy">
+            <span class="tool-index">Tool 01 · v1.3.2</span>
+            <h3>班级工作台</h3>
+            <p>把排课、排座、分组、点名、作业统计和课堂小游戏收进同一个本地网页。</p>
+            <div class="tags"><span class="tag">单 HTML</span><span class="tag">离线可用</span><span class="tag">本地存储</span><span class="tag">可导出备份</span></div>
+            <div class="hero-actions"><a class="btn primary" href="tools/teacher-workbench/">在线使用</a><a class="btn secondary" href="tools/teacher-workbench/index.html" download="班级工作台-v1.3.2.html">下载单文件</a></div>
+          </div>
+          <div class="tool-visual" aria-hidden="true">
+            <div class="desk"><div class="desk-top"><span>班级工作台</span><span>v1.3.2</span></div><div class="desk-grid"><span class="desk-cell">课表</span><span class="desk-cell">排座</span><span class="desk-cell">分组</span><span class="desk-cell">考勤</span><span class="desk-cell">作业</span><span class="desk-cell">趣味学习</span></div></div>
+          </div>
+        </article>
+      </section>
+
+      <section class="section" id="principles">
+        <div class="section-head"><h2>公开，但不公开学生</h2><p>工具可以分享，班级隐私不能分享。</p></div>
+        <div class="promise-grid">
+          <div class="promise"><b>本地优先</b><p>班级数据默认保存在当前浏览器，不上传到本项目。</p></div>
+          <div class="promise"><b>备份可控</b><p>通过导出和导入完成迁移，老师始终掌握自己的数据。</p></div>
+          <div class="promise"><b>保持简单</b><p>尽量不引入服务器、账号体系和复杂安装步骤。</p></div>
+        </div>
+      </section>
+    </main>
+
+    <footer><span>MIT License · TeacherTools</span><span>作者：<a class="author" href="https://aieduflow.cn/" target="_blank" rel="noopener noreferrer">科学老师学AI ↗</a></span></footer>
+  </div>
+</body>
+</html>
